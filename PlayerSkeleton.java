@@ -3,6 +3,79 @@ import java.util.Arrays;
 
 public class PlayerSkeleton {
 	
+	//tenth factor of priority, landingHeight
+	private static int getLandingHeight(int[][] field){
+		int max=-1;
+		for(int i=0;i<21;i++){
+			for(int j=0;j<10;j++){
+				if(field[i][j]>max){
+					max=field[i][j];
+				}
+			}
+		}
+		int maxheight=-1;
+		int minheight=25;
+		for(int i=20;i>=0;i--){
+			for(int j=0;j<10;j++){
+				if(max==field[i][j]){
+					if(maxheight<i){
+						maxheight=i;
+					}
+					if(minheight>i){
+						minheight=i;
+					}
+				}
+			}
+		}
+		return ((maxheight+minheight)/2);
+	}
+	
+	//eightth factor of priority, rowTransitions
+	private static int getRowTransitions(int[][] field){
+		int counter=0;
+		int curr=0;
+		int prev=1;
+		for(int i=0;i<21;i++){
+			prev=1;
+			for(int j=0;j<10;j++){
+				curr=field[i][j];
+				if(curr>1){
+					curr=1;
+				}
+				if(curr!=prev){
+					counter++;
+				}
+				prev=curr;
+			}
+			if(curr==0){
+				counter++;
+			}
+		}
+		return counter;
+	}
+	
+	//seventh factor of priority, columnTransitions
+	private static int getColumnTransitions(int[][] field){
+		int counter=0;
+		int curr=0;
+		int prev=1;
+		for(int j=0;j<10;j++){
+			prev=1;
+			for(int i=20;i>=0;i--){
+				curr=field[i][j];
+				if(curr>1){
+					curr=1;
+				}
+				if(curr!=prev){
+					counter++;
+				}
+				prev=curr;
+			}
+		}
+		return counter;
+	}
+		
+	
 	//sixth factor of priority, num of wells
 	private static int getNumOfWells(int[][] field){
 		int counter=0;
@@ -130,12 +203,17 @@ public class PlayerSkeleton {
 	
 	//priority, set the weight here
 	private static double getPriority(int[][] field){
-		double lineWeight =4.144;
-		double heightWeight=-0.076;
-		double holeWeight=-12.3;
-		double blockageWeight=-6.61;
-		double bumpinessWeight=-2.13;
-		double wellWeight=-0.861;
+		
+		double lineWeight =3.4181268;
+		double heightWeight= -4.5;
+		double holeWeight=-7.899265427;
+		double blockageWeight=0;
+		double bumpinessWeight=0;
+		double wellWeight=-3.3855972247;
+		double rowTransitionWeight = -3.217888;
+		double columnTransitionWeight = -9.348695;
+		double heightLandingWeight = 0;
+		
 		
 		double line = getLinesFormed(field);
 		double height = getResultantHeight(field);
@@ -143,6 +221,9 @@ public class PlayerSkeleton {
 		double blockage = getNumOfBlockages(field);
 		double bumpiness = getBumpinessIndex(field);
 		double well = getNumOfWells(field);
+		double rowTransition = getRowTransitions(field);
+		double columnTransition = getColumnTransitions(field);
+		double heightLanding = getLandingHeight(field);
 		
 		double score = lineWeight*line;
 		score += heightWeight*height;
@@ -150,6 +231,9 @@ public class PlayerSkeleton {
 		score += blockageWeight*blockage;
 		score += bumpinessWeight*bumpiness;
 		score += wellWeight*well;
+		score += rowTransitionWeight*rowTransition;
+		score += columnTransitionWeight*columnTransition;
+		score += heightLandingWeight*heightLanding;
 		
 		return score;
 	}
@@ -738,8 +822,7 @@ public class PlayerSkeleton {
 					priority[counter]=getPriority(newField);
 					counter++;
 				}
-		}
-			
+		}	
 		double maximum=-2000000000;
 		int indexRes=-1;
 		for(int i=0;i<counter;i++){

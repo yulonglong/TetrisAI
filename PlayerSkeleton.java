@@ -2,22 +2,15 @@ import java.util.Scanner;
 import java.util.Arrays;
 
 public class PlayerSkeleton {
+	static int INF = 2000000000;
 	
 	//tenth factor of priority, landingHeight
 	private static int getLandingHeight(int[][] field){
-		int max=-1;
-		for(int i=0;i<21;i++){
-			for(int j=0;j<10;j++){
-				if(field[i][j]>max){
-					max=field[i][j];
-				}
-			}
-		}
 		int maxheight=-1;
 		int minheight=25;
 		for(int i=20;i>=0;i--){
 			for(int j=0;j<10;j++){
-				if(max==field[i][j]){
+				if(INF==field[i][j]){
 					if(maxheight<i){
 						maxheight=i;
 					}
@@ -205,14 +198,14 @@ public class PlayerSkeleton {
 	private static double getPriority(int[][] field){
 		
 		double lineWeight =3.4181268;
-		double heightWeight= -4.5;
+		double heightWeight= 0;
 		double holeWeight=-7.899265427;
 		double blockageWeight=0;
 		double bumpinessWeight=0;
 		double wellWeight=-3.3855972247;
 		double rowTransitionWeight = -3.217888;
 		double columnTransitionWeight = -9.348695;
-		double heightLandingWeight = 0;
+		double heightLandingWeight = -4.5;
 		
 		
 		double line = getLinesFormed(field);
@@ -269,17 +262,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+1][index]=1;
-					field[i+1][index+1]=1;
-					field[i+2][index]=1;
-					field[i+2][index+1]=1;
+					field[i+1][index]=INF;
+					field[i+1][index+1]=INF;
+					field[i+2][index]=INF;
+					field[i+2][index+1]=INF;
 					return field;
 				}
 			}
-			field[0][index]=1;
-			field[0][index+1]=1;
-			field[1][index]=1;
-			field[1][index+1]=1;
+			field[0][index]=INF;
+			field[0][index+1]=INF;
+			field[1][index]=INF;
+			field[1][index+1]=INF;
 			return field;
 		}
 		//type 1 orient 0
@@ -289,17 +282,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+1][index]=1;
-					field[i+2][index]=1;
-					field[i+3][index]=1;
-					field[i+4][index]=1;
+					field[i+1][index]=INF;
+					field[i+2][index]=INF;
+					field[i+3][index]=INF;
+					field[i+4][index]=INF;
 					return field;
 				}
 			}
-			field[0][index]=1;
-			field[1][index]=1;
-			field[2][index]=1;
-			field[3][index]=1;
+			field[0][index]=INF;
+			field[1][index]=INF;
+			field[2][index]=INF;
+			field[3][index]=INF;
 			return field;
 		}
 		//type 1 orient 1
@@ -309,17 +302,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+1][index]=1;
-					field[i+1][index+1]=1;
-					field[i+1][index+2]=1;
-					field[i+1][index+3]=1;
+					field[i+1][index]=INF;
+					field[i+1][index+1]=INF;
+					field[i+1][index+2]=INF;
+					field[i+1][index+3]=INF;
 					return field;
 				}
 			}
-			field[0][index]=1;
-			field[0][index+1]=1;
-			field[0][index+2]=1;
-			field[0][index+3]=1;
+			field[0][index]=INF;
+			field[0][index+1]=INF;
+			field[0][index+2]=INF;
+			field[0][index+3]=INF;
 			return field;
 		}
 		//type 2 orient 0
@@ -329,17 +322,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+1][index]=1;
-					field[i+1][index+1]=1;
-					field[i+2][index]=1;
-					field[i+3][index]=1;
+					field[i+1][index]=INF;
+					field[i+1][index+1]=INF;
+					field[i+2][index]=INF;
+					field[i+3][index]=INF;
 					return field;
 				}
 			}
-			field[0][index]=1;
-			field[0][index+1]=1;
-			field[1][index]=1;
-			field[2][index]=1;
+			field[0][index]=INF;
+			field[0][index+1]=INF;
+			field[1][index]=INF;
+			field[2][index]=INF;
 			return field;
 		}
 		//type 2 orient 1
@@ -349,17 +342,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+1][index]=1;
-					field[i+2][index]=1;
-					field[i+2][index+1]=1;
-					field[i+2][index+2]=1;
+					field[i+1][index]=INF;
+					field[i+2][index]=INF;
+					field[i+2][index+1]=INF;
+					field[i+2][index+2]=INF;
 					return field;
 				}
 			}
-			field[0][index]=1;
-			field[1][index]=1;
-			field[1][index+1]=1;
-			field[1][index+2]=1;
+			field[0][index]=INF;
+			field[1][index]=INF;
+			field[1][index+1]=INF;
+			field[1][index+2]=INF;
 			return field;
 		}
 		//type 2 orient 2
@@ -369,17 +362,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+3][index]=1;
-					field[i+3][index+1]=1;
-					field[i+2][index+1]=1;
-					field[i+1][index+1]=1;
+					field[i+3][index]=INF;
+					field[i+3][index+1]=INF;
+					field[i+2][index+1]=INF;
+					field[i+1][index+1]=INF;
 					return field;
 				}
 			}
-			field[2][index]=1;
-			field[2][index+1]=1;
-			field[1][index+1]=1;
-			field[0][index+1]=1;
+			field[2][index]=INF;
+			field[2][index+1]=INF;
+			field[1][index+1]=INF;
+			field[0][index+1]=INF;
 			return field;
 		}
 		//type 2 orient 3
@@ -389,17 +382,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+1][index]=1;
-					field[i+1][index+1]=1;
-					field[i+1][index+2]=1;
-					field[i+2][index+2]=1;
+					field[i+1][index]=INF;
+					field[i+1][index+1]=INF;
+					field[i+1][index+2]=INF;
+					field[i+2][index+2]=INF;
 					return field;
 				}
 			}
-			field[0][index]=1;
-			field[0][index+1]=1;
-			field[0][index+2]=1;
-			field[1][index+2]=1;
+			field[0][index]=INF;
+			field[0][index+1]=INF;
+			field[0][index+2]=INF;
+			field[1][index+2]=INF;
 			return field;
 		}
 		//type 3 orient 0
@@ -409,17 +402,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+1][index]=1;
-					field[i+1][index+1]=1;
-					field[i+2][index+1]=1;
-					field[i+3][index+1]=1;
+					field[i+1][index]=INF;
+					field[i+1][index+1]=INF;
+					field[i+2][index+1]=INF;
+					field[i+3][index+1]=INF;
 					return field;
 				}
 			}
-			field[0][index]=1;
-			field[0][index+1]=1;
-			field[1][index+1]=1;
-			field[2][index+1]=1;
+			field[0][index]=INF;
+			field[0][index+1]=INF;
+			field[1][index+1]=INF;
+			field[2][index+1]=INF;
 			return field;
 		}
 		//type 3 orient 1
@@ -429,17 +422,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+1][index]=1;
-					field[i+1][index+1]=1;
-					field[i+1][index+2]=1;
-					field[i+2][index]=1;
+					field[i+1][index]=INF;
+					field[i+1][index+1]=INF;
+					field[i+1][index+2]=INF;
+					field[i+2][index]=INF;
 					return field;
 				}
 			}
-			field[0][index]=1;
-			field[0][index+1]=1;
-			field[0][index+2]=1;
-			field[1][index]=1;
+			field[0][index]=INF;
+			field[0][index+1]=INF;
+			field[0][index+2]=INF;
+			field[1][index]=INF;
 			return field;
 		}
 		//type 3 orient 2
@@ -449,17 +442,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+3][index]=1;
-					field[i+3][index+1]=1;
-					field[i+2][index]=1;
-					field[i+1][index]=1;
+					field[i+3][index]=INF;
+					field[i+3][index+1]=INF;
+					field[i+2][index]=INF;
+					field[i+1][index]=INF;
 					return field;
 				}
 			}
-			field[2][index]=1;
-			field[2][index+1]=1;
-			field[1][index]=1;
-			field[0][index]=1;
+			field[2][index]=INF;
+			field[2][index+1]=INF;
+			field[1][index]=INF;
+			field[0][index]=INF;
 			return field;
 		}
 		//type 3 orient 3
@@ -469,17 +462,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+1][index+2]=1;
-					field[i+2][index]=1;
-					field[i+2][index+1]=1;
-					field[i+2][index+2]=1;
+					field[i+1][index+2]=INF;
+					field[i+2][index]=INF;
+					field[i+2][index+1]=INF;
+					field[i+2][index+2]=INF;
 					return field;
 				}
 			}
-			field[0][index+2]=1;
-			field[1][index]=1;
-			field[1][index+1]=1;
-			field[1][index+2]=1;
+			field[0][index+2]=INF;
+			field[1][index]=INF;
+			field[1][index+1]=INF;
+			field[1][index+2]=INF;
 			return field;
 		}
 		//type 4 orient 0
@@ -489,17 +482,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+3][index]=1;
-					field[i+2][index+1]=1;
-					field[i+2][index]=1;
-					field[i+1][index]=1;
+					field[i+3][index]=INF;
+					field[i+2][index+1]=INF;
+					field[i+2][index]=INF;
+					field[i+1][index]=INF;
 					return field;
 				}
 			}
-			field[2][index]=1;
-			field[1][index+1]=1;
-			field[1][index]=1;
-			field[0][index]=1;
+			field[2][index]=INF;
+			field[1][index+1]=INF;
+			field[1][index]=INF;
+			field[0][index]=INF;
 			return field;
 		}
 		//type 4 orient 1
@@ -509,17 +502,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+1][index+1]=1;
-					field[i+2][index]=1;
-					field[i+2][index+1]=1;
-					field[i+2][index+2]=1;
+					field[i+1][index+1]=INF;
+					field[i+2][index]=INF;
+					field[i+2][index+1]=INF;
+					field[i+2][index+2]=INF;
 					return field;
 				}
 			}
-			field[0][index+1]=1;
-			field[1][index]=1;
-			field[1][index+1]=1;
-			field[1][index+2]=1;
+			field[0][index+1]=INF;
+			field[1][index]=INF;
+			field[1][index+1]=INF;
+			field[1][index+2]=INF;
 			return field;
 		}
 		//type 4 orient 2
@@ -529,17 +522,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+2][index]=1;
-					field[i+3][index+1]=1;
-					field[i+2][index+1]=1;
-					field[i+1][index+1]=1;
+					field[i+2][index]=INF;
+					field[i+3][index+1]=INF;
+					field[i+2][index+1]=INF;
+					field[i+1][index+1]=INF;
 					return field;
 				}
 			}
-			field[1][index]=1;
-			field[2][index+1]=1;
-			field[1][index+1]=1;
-			field[0][index+1]=1;
+			field[1][index]=INF;
+			field[2][index+1]=INF;
+			field[1][index+1]=INF;
+			field[0][index+1]=INF;
 			return field;
 		}
 		//type 4 orient 3
@@ -549,17 +542,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+1][index]=1;
-					field[i+1][index+1]=1;
-					field[i+1][index+2]=1;
-					field[i+2][index+1]=1;
+					field[i+1][index]=INF;
+					field[i+1][index+1]=INF;
+					field[i+1][index+2]=INF;
+					field[i+2][index+1]=INF;
 					return field;
 				}
 			}
-			field[0][index]=1;
-			field[0][index+1]=1;
-			field[0][index+2]=1;
-			field[1][index+1]=1;
+			field[0][index]=INF;
+			field[0][index+1]=INF;
+			field[0][index+2]=INF;
+			field[1][index+1]=INF;
 			return field;
 		}
 		//type 5 orient 0
@@ -569,17 +562,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+1][index]=1;
-					field[i+1][index+1]=1;
-					field[i+2][index+1]=1;
-					field[i+2][index+2]=1;
+					field[i+1][index]=INF;
+					field[i+1][index+1]=INF;
+					field[i+2][index+1]=INF;
+					field[i+2][index+2]=INF;
 					return field;
 				}
 			}
-			field[0][index]=1;
-			field[0][index+1]=1;
-			field[1][index+1]=1;
-			field[1][index+2]=1;
+			field[0][index]=INF;
+			field[0][index+1]=INF;
+			field[1][index+1]=INF;
+			field[1][index+2]=INF;
 			return field;
 		}
 		//type 5 orient 1
@@ -589,17 +582,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+1][index+1]=1;
-					field[i+2][index+1]=1;
-					field[i+2][index]=1;
-					field[i+3][index]=1;
+					field[i+1][index+1]=INF;
+					field[i+2][index+1]=INF;
+					field[i+2][index]=INF;
+					field[i+3][index]=INF;
 					return field;
 				}
 			}
-			field[0][index+1]=1;
-			field[1][index+1]=1;
-			field[1][index]=1;
-			field[2][index]=1;
+			field[0][index+1]=INF;
+			field[1][index+1]=INF;
+			field[1][index]=INF;
+			field[2][index]=INF;
 			return field;
 		}
 		//type 6 orient 0
@@ -609,17 +602,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+1][index+1]=1;
-					field[i+1][index+2]=1;
-					field[i+2][index]=1;
-					field[i+2][index+1]=1;
+					field[i+1][index+1]=INF;
+					field[i+1][index+2]=INF;
+					field[i+2][index]=INF;
+					field[i+2][index+1]=INF;
 					return field;
 				}
 			}
-			field[0][index+1]=1;
-			field[0][index+2]=1;
-			field[1][index]=1;
-			field[1][index+1]=1;
+			field[0][index+1]=INF;
+			field[0][index+2]=INF;
+			field[1][index]=INF;
+			field[1][index+1]=INF;
 			return field;
 		}
 		else if((type==6)&&(orient==1)){
@@ -628,17 +621,17 @@ public class PlayerSkeleton {
 					continue;
 				}
 				else{
-					field[i+1][index]=1;
-					field[i+2][index]=1;
-					field[i+2][index+1]=1;
-					field[i+3][index+1]=1;
+					field[i+1][index]=INF;
+					field[i+2][index]=INF;
+					field[i+2][index+1]=INF;
+					field[i+3][index+1]=INF;
 					return field;
 				}
 			}
-			field[0][index]=1;
-			field[1][index]=1;
-			field[1][index+1]=1;
-			field[2][index+1]=1;
+			field[0][index]=INF;
+			field[1][index]=INF;
+			field[1][index+1]=INF;
+			field[2][index+1]=INF;
 			return field;
 		}
 		return field;

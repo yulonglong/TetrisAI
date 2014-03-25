@@ -3,6 +3,157 @@ import java.util.Arrays;
 
 public class PlayerSkeleton {
 	
+	//sixth factor of priority, num of wells
+	private static int getNumOfWells(int[][] field){
+		int counter=0;
+		for(int i=0;i<19;i++){
+			
+			//check most left
+			if((field[i][0]==0)&&(field[i+1][0]==0)&&(field[i+2][0]==0)){
+				if((field[i][1]!=0)&&(field[i+1][1]!=0)&&(field[i+2][1]!=0)){
+					counter++;
+				}
+			}
+			
+			for(int j=1;j<9;j++){
+				//if center is empty
+				if((field[i][j]==0)&&(field[i+1][j]==0)&&(field[i+2][j]==0)){
+					//if left occupied
+					if((field[i][j-1]!=0)&&(field[i+1][j-1]!=0)&&(field[i+2][j-1]!=0)){
+						//if right occupied
+						if((field[i][j+1]!=0)&&(field[i+1][j+1]!=0)&&(field[i+2][j+1]!=0)){
+							counter++;
+						}
+					}
+				}
+			}
+			
+			//check most right
+			if((field[i][9]==0)&&(field[i+1][9]==0)&&(field[i+2][9]==0)){
+				if((field[i][8]!=0)&&(field[i+1][8]!=0)&&(field[i+2][8]!=0)){
+					counter++;
+				}
+			}
+			
+		}
+		return counter;
+	}
+	
+	//fifth factor of priority, index of Bumpiness
+	private static int getBumpinessIndex(int[][] field){
+		int[] height = new int[10];
+		for(int i=0;i<10;i++){
+			height[i]=0;
+		}
+		
+		for(int j=0;j<10;j++){
+			for(int i=20;i>=0;i--){
+				if(field[i][j]!=0){
+					height[j]=i+1;
+					break;
+				}
+			}
+		}
+		int bumpiness = 0;
+		for(int i=0;i<9;i++){
+			bumpiness = bumpiness + Math.abs(height[i]-height[i+1]);
+		}
+		return bumpiness;
+	}
+	
+	//fourth factor of priority,number of Blockages 
+	private static int getNumOfBlockages(int[][] field){
+		int counter=0;
+		boolean valid=false;
+		for(int j=0;j<10;j++){
+			valid=false;
+			for(int i=1;i<21;i++){
+				if((field[i][j]!=0)&&(field[i-1][j]==0)){
+					valid=true;
+				}
+				if((valid)&&(field[i][j]!=0)){
+					counter++;
+				}
+			}
+		}
+		return counter;
+	}
+	
+	//third factor of priority, number of holes
+	private static int getNumOfHoles(int[][] field){
+		int[][] tempField;
+		tempField = copyArray(field);
+		int counter=0;
+		for(int i=20;i>=1;i--){
+			for(int j=0;j<10;j++){
+				if((tempField[i][j]!=0)&&(tempField[i-1][j]==0)){
+					counter++;
+					tempField[i][j]=1;
+				}
+			}
+		}
+		return counter;
+	}
+	
+	//first factor of priority, Lines Formed
+	private static int getLinesFormed(int[][] field){
+		boolean valid=true;
+		int counter=0;
+		for(int i=0;i<21;i++){
+			valid=true;
+			for(int j=0;j<10;j++){
+				if(field[i][j]==0){
+					valid=false;
+				}
+			}
+			if(valid){
+				counter++;
+			}
+		}
+		return counter;
+	}
+	
+	//second factor of priority, resultant height
+	private static int getResultantHeight(int[][] field){
+		int max=0;
+		for(int i=0;i<21;i++){
+			for(int j=0;j<10;j++){
+				if(field[i][j]!=0){
+					if(max<i){
+						max=i;
+					}
+				}
+			}
+		}
+		return max+1;
+	}
+	
+	//priority, set the weight here
+	private static double getPriority(int[][] field){
+		double lineWeight =4.144;
+		double heightWeight=-0.076;
+		double holeWeight=-12.3;
+		double blockageWeight=-6.61;
+		double bumpinessWeight=-2.13;
+		double wellWeight=-0.861;
+		
+		double line = getLinesFormed(field);
+		double height = getResultantHeight(field);
+		double hole = getNumOfHoles(field);
+		double blockage = getNumOfBlockages(field);
+		double bumpiness = getBumpinessIndex(field);
+		double well = getNumOfWells(field);
+		
+		double score = lineWeight*line;
+		score += heightWeight*height;
+		score += holeWeight*hole;
+		score += blockageWeight*blockage;
+		score += bumpinessWeight*bumpiness;
+		score += wellWeight*well;
+		
+		return score;
+	}
+	
 	private static boolean topIsClear(int index, int height, int width,int[][] field){
 		for(int i=height;i<21;i++){
 			for(int k=index;k<index+width;k++){
@@ -13,12 +164,406 @@ public class PlayerSkeleton {
 		}
 		return true;
 	}
+	
+	private static int[][] copyArray(int[][] arr){
+		int[][] newArr = new int[21][10];
+		for(int i=0;i<21;i++){
+			for(int j=0;j<10;j++){
+				newArr[i][j]=arr[i][j];
+			}
+		}
+		return newArr;
+	}
+	
+	
+	//VERY LONG METHOD, WARNING
+	private static int[][] exeMove(int[][] field,int orient,int index, int type){
+		//type 0
+		if(type==0){
+			for(int i=18;i>=0;i--){
+				if((field[i][index]==0)&&(field[i][index+1]==0)){
+					continue;
+				}
+				else{
+					field[i+1][index]=1;
+					field[i+1][index+1]=1;
+					field[i+2][index]=1;
+					field[i+2][index+1]=1;
+					return field;
+				}
+			}
+			field[0][index]=1;
+			field[0][index+1]=1;
+			field[1][index]=1;
+			field[1][index+1]=1;
+			return field;
+		}
+		//type 1 orient 0
+		else if((type==1)&&(orient==0)){
+			for(int i=16;i>=0;i--){
+				if(field[i][index]==0){
+					continue;
+				}
+				else{
+					field[i+1][index]=1;
+					field[i+2][index]=1;
+					field[i+3][index]=1;
+					field[i+4][index]=1;
+					return field;
+				}
+			}
+			field[0][index]=1;
+			field[1][index]=1;
+			field[2][index]=1;
+			field[3][index]=1;
+			return field;
+		}
+		//type 1 orient 1
+		else if((type==1)&&(orient==1)){
+			for(int i=19;i>=0;i--){
+				if((field[i][index]==0)&&(field[i][index+1]==0)&&(field[i][index+2]==0)&&(field[i][index+3]==0)){
+					continue;
+				}
+				else{
+					field[i+1][index]=1;
+					field[i+1][index+1]=1;
+					field[i+1][index+2]=1;
+					field[i+1][index+3]=1;
+					return field;
+				}
+			}
+			field[0][index]=1;
+			field[0][index+1]=1;
+			field[0][index+2]=1;
+			field[0][index+3]=1;
+			return field;
+		}
+		//type 2 orient 0
+		else if((type==2)&&(orient==0)){
+			for(int i=17;i>=0;i--){
+				if((field[i][index]==0)&&(field[i][index+1]==0)){
+					continue;
+				}
+				else{
+					field[i+1][index]=1;
+					field[i+1][index+1]=1;
+					field[i+2][index]=1;
+					field[i+3][index]=1;
+					return field;
+				}
+			}
+			field[0][index]=1;
+			field[0][index+1]=1;
+			field[1][index]=1;
+			field[2][index]=1;
+			return field;
+		}
+		//type 2 orient 1
+		else if((type==2)&&(orient==1)){
+			for(int i=18;i>=0;i--){
+				if((field[i][index]==0)&&(field[i+1][index]==0)&&(field[i+1][index+1]==0)&&(field[i+1][index+2]==0)){
+					continue;
+				}
+				else{
+					field[i+1][index]=1;
+					field[i+2][index]=1;
+					field[i+2][index+1]=1;
+					field[i+2][index+2]=1;
+					return field;
+				}
+			}
+			field[0][index]=1;
+			field[1][index]=1;
+			field[1][index+1]=1;
+			field[1][index+2]=1;
+			return field;
+		}
+		//type 2 orient 2
+		else if((type==2)&&(orient==2)){
+			for(int i=17;i>=0;i--){
+				if((field[i+2][index]==0)&&(field[i+2][index+1]==0)&&(field[i+1][index+1]==0)&&(field[i][index+1]==0)){
+					continue;
+				}
+				else{
+					field[i+3][index]=1;
+					field[i+3][index+1]=1;
+					field[i+2][index+1]=1;
+					field[i+1][index+1]=1;
+					return field;
+				}
+			}
+			field[2][index]=1;
+			field[2][index+1]=1;
+			field[1][index+1]=1;
+			field[0][index+1]=1;
+			return field;
+		}
+		//type 2 orient 3
+		else if((type==2)&&(orient==3)){
+			for(int i=18;i>=0;i--){
+				if((field[i][index]==0)&&(field[i][index+1]==0)&&(field[i][index+2]==0)){
+					continue;
+				}
+				else{
+					field[i+1][index]=1;
+					field[i+1][index+1]=1;
+					field[i+1][index+2]=1;
+					field[i+2][index+2]=1;
+					return field;
+				}
+			}
+			field[0][index]=1;
+			field[0][index+1]=1;
+			field[0][index+2]=1;
+			field[1][index+2]=1;
+			return field;
+		}
+		//type 3 orient 0
+		else if((type==3)&&(orient==0)){
+			for(int i=17;i>=0;i--){
+				if((field[i][index]==0)&&(field[i][index+1]==0)){
+					continue;
+				}
+				else{
+					field[i+1][index]=1;
+					field[i+1][index+1]=1;
+					field[i+2][index+1]=1;
+					field[i+3][index+1]=1;
+					return field;
+				}
+			}
+			field[0][index]=1;
+			field[0][index+1]=1;
+			field[1][index+1]=1;
+			field[2][index+1]=1;
+			return field;
+		}
+		//type 3 orient 1
+		else if((type==3)&&(orient==1)){
+			for(int i=18;i>=0;i--){
+				if((field[i][index]==0)&&(field[i][index+1]==0)&&(field[i][index+2]==0)){
+					continue;
+				}
+				else{
+					field[i+1][index]=1;
+					field[i+1][index+1]=1;
+					field[i+1][index+2]=1;
+					field[i+2][index]=1;
+					return field;
+				}
+			}
+			field[0][index]=1;
+			field[0][index+1]=1;
+			field[0][index+2]=1;
+			field[1][index]=1;
+			return field;
+		}
+		//type 3 orient 2
+		else if((type==3)&&(orient==2)){
+			for(int i=17;i>=0;i--){
+				if((field[i+2][index+1]==0)&&(field[i+2][index]==0)&&(field[i+1][index]==0)&&(field[i][index]==0)){
+					continue;
+				}
+				else{
+					field[i+3][index]=1;
+					field[i+3][index+1]=1;
+					field[i+2][index]=1;
+					field[i+1][index]=1;
+					return field;
+				}
+			}
+			field[2][index]=1;
+			field[2][index+1]=1;
+			field[1][index]=1;
+			field[0][index]=1;
+			return field;
+		}
+		//type 3 orient 3
+		else if((type==3)&&(orient==3)){
+			for(int i=18;i>=0;i--){
+				if((field[i][index+2]==0)&&(field[i+1][index]==0)&&(field[i+1][index+1]==0)&&(field[i+1][index+2]==0)){
+					continue;
+				}
+				else{
+					field[i+1][index+2]=1;
+					field[i+2][index]=1;
+					field[i+2][index+1]=1;
+					field[i+2][index+2]=1;
+					return field;
+				}
+			}
+			field[0][index+2]=1;
+			field[1][index]=1;
+			field[1][index+1]=1;
+			field[1][index+2]=1;
+			return field;
+		}
+		//type 4 orient 0
+		else if((type==4)&&(orient==0)){
+			for(int i=17;i>=0;i--){
+				if((field[i+1][index+1]==0)&&(field[i+2][index]==0)&&(field[i+1][index]==0)&&(field[i][index]==0)){
+					continue;
+				}
+				else{
+					field[i+3][index]=1;
+					field[i+2][index+1]=1;
+					field[i+2][index]=1;
+					field[i+1][index]=1;
+					return field;
+				}
+			}
+			field[2][index]=1;
+			field[1][index+1]=1;
+			field[1][index]=1;
+			field[0][index]=1;
+			return field;
+		}
+		//type 4 orient 1
+		else if((type==4)&&(orient==1)){
+			for(int i=18;i>=0;i--){
+				if((field[i][index+1]==0)&&(field[i+1][index]==0)&&(field[i+1][index+1]==0)&&(field[i+1][index+2]==0)){
+					continue;
+				}
+				else{
+					field[i+1][index+1]=1;
+					field[i+2][index]=1;
+					field[i+2][index+1]=1;
+					field[i+2][index+2]=1;
+					return field;
+				}
+			}
+			field[0][index+1]=1;
+			field[1][index]=1;
+			field[1][index+1]=1;
+			field[1][index+2]=1;
+			return field;
+		}
+		//type 4 orient 2
+		else if((type==4)&&(orient==2)){
+			for(int i=17;i>=0;i--){
+				if((field[i+1][index]==0)&&(field[i+2][index+1]==0)&&(field[i+1][index+1]==0)&&(field[i][index+1]==0)){
+					continue;
+				}
+				else{
+					field[i+2][index]=1;
+					field[i+3][index+1]=1;
+					field[i+2][index+1]=1;
+					field[i+1][index+1]=1;
+					return field;
+				}
+			}
+			field[1][index]=1;
+			field[2][index+1]=1;
+			field[1][index+1]=1;
+			field[0][index+1]=1;
+			return field;
+		}
+		//type 4 orient 3
+		else if((type==4)&&(orient==3)){
+			for(int i=18;i>=0;i--){
+				if((field[i][index]==0)&&(field[i][index+1]==0)&&(field[i][index+2]==0)){
+					continue;
+				}
+				else{
+					field[i+1][index]=1;
+					field[i+1][index+1]=1;
+					field[i+1][index+2]=1;
+					field[i+2][index+1]=1;
+					return field;
+				}
+			}
+			field[0][index]=1;
+			field[0][index+1]=1;
+			field[0][index+2]=1;
+			field[1][index+1]=1;
+			return field;
+		}
+		//type 5 orient 0
+		else if((type==5)&&(orient==0)){
+			for(int i=18;i>=0;i--){
+				if((field[i][index]==0)&&(field[i][index+1]==0)&&(field[i+1][index+2]==0)){
+					continue;
+				}
+				else{
+					field[i+1][index]=1;
+					field[i+1][index+1]=1;
+					field[i+2][index+1]=1;
+					field[i+2][index+2]=1;
+					return field;
+				}
+			}
+			field[0][index]=1;
+			field[0][index+1]=1;
+			field[1][index+1]=1;
+			field[1][index+2]=1;
+			return field;
+		}
+		//type 5 orient 1
+		else if((type==5)&&(orient==1)){
+			for(int i=17;i>=0;i--){
+				if((field[i+1][index]==0)&&(field[i+1][index+1]==0)&&(field[i][index+1]==0)){
+					continue;
+				}
+				else{
+					field[i+1][index+1]=1;
+					field[i+2][index+1]=1;
+					field[i+2][index]=1;
+					field[i+3][index]=1;
+					return field;
+				}
+			}
+			field[0][index+1]=1;
+			field[1][index+1]=1;
+			field[1][index]=1;
+			field[2][index]=1;
+			return field;
+		}
+		//type 6 orient 0
+		else if((type==6)&&(orient==0)){
+			for(int i=18;i>=0;i--){
+				if((field[i+1][index]==0)&&(field[i][index+1]==0)&&(field[i][index+2]==0)){
+					continue;
+				}
+				else{
+					field[i+1][index+1]=1;
+					field[i+1][index+2]=1;
+					field[i+2][index]=1;
+					field[i+2][index+1]=1;
+					return field;
+				}
+			}
+			field[0][index+1]=1;
+			field[0][index+2]=1;
+			field[1][index]=1;
+			field[1][index+1]=1;
+			return field;
+		}
+		else if((type==6)&&(orient==1)){
+			for(int i=17;i>=0;i--){
+				if((field[i][index]==0)&&(field[i+1][index+1]==0)&&(field[i+1][index+1]==0)){
+					continue;
+				}
+				else{
+					field[i+1][index]=1;
+					field[i+2][index]=1;
+					field[i+2][index+1]=1;
+					field[i+3][index+1]=1;
+					return field;
+				}
+			}
+			field[0][index]=1;
+			field[1][index]=1;
+			field[1][index+1]=1;
+			field[2][index+1]=1;
+			return field;
+		}
+		return field;
+	}
 
 	//implement this function to have a working system
 	public int pickMove(State s, int[][] legalMoves) {
-		int[] storeIndex = new int[3000];
-		int[] height = new int[3000];
-		int priority = 3;
+		int[] storeIndex = new int[100];
+		double[] priority = new double[100];
 		int counter=0;
 		
 		int maxHorz=20;
@@ -27,221 +572,179 @@ public class PlayerSkeleton {
 		int nextPiece = s.nextPiece;
 		int[][] field = new int[21][10];
 		field = s.getField();
-		for(int i=0;i<21;i++){
-			for(int j=0;j<10;j++){
-				if(field[i][j]!=0){
-					currHeight = i;
-				}
-			}
-		}
+		int[][] copyField = copyArray(field);
+		int[][] newField = copyArray(field);
+		
 		
 		if(nextPiece==0){
-			for(int i=0;i<maxHorz;i++){
-				for(int j=0;j<9;j++){
-					if((field[i][j]==0)&&(field[i][j+1]==0)&&(topIsClear(j,i,2,field))){
-						storeIndex[counter]=j;
-						height[counter]=i;
-						counter++;
-					}
-				}
+			for(int j=0;j<9;j++){
+				newField = copyArray(copyField);
+				newField = exeMove(newField,0,j,0);
+				storeIndex[counter]=j;
+				priority[counter]=getPriority(newField);
+				counter++;
 			}
 		}
 		else if(nextPiece==1){
-			for(int i=0;i<18;i++){
-				for(int j=0;j<9;j++){
-					if((topIsClear(j,i,1,field))&&(field[i][j+1]!=0)){
-						storeIndex[counter]=j;
-						height[counter]=i;
-						counter++;
-					}
-					else if((field[i][j]!=0)&&(topIsClear(j+1,i,1,field))){
-						storeIndex[counter]=j+1;
-						height[counter]=i;
-						counter++;
-					}
+				for(int j=0;j<=9;j++){
+					newField = copyArray(copyField);
+					newField = exeMove(newField,0,j,1);
+					storeIndex[counter]=j;
+					priority[counter]=getPriority(newField);
+					counter++;
 				}
-			}
+				for(int j=0;j<=5;j++){
+					newField = copyArray(copyField);
+					newField = exeMove(newField,1,j,1);
+					storeIndex[counter]=10+j;
+					priority[counter]=getPriority(newField);
+					counter++;
+				}
 		}
 		else if(nextPiece==2){
-			for(int i=0;i<maxVert;i++){
-				for(int j=0;j<9;j++){
-					if((field[i][j]==0)&&(field[i][j+1]==0)&&(topIsClear(j,i,2,field))){
-						storeIndex[counter]=j;
-						height[counter]=i;
-						counter++;
-					}
-				}
+			for(int j=0;j<9;j++){
+				newField = copyArray(copyField);
+				newField = exeMove(newField,0,j,2);
+				storeIndex[counter]=j;
+				priority[counter]=getPriority(newField);
+				counter++;
 			}
-			for(int i=0;i<maxHorz;i++){
-				for(int j=0;j<8;j++){
-					if((field[i][j]==0)&&(field[i+1][j]==0)&&(field[i+1][j+1]==0)&&(field[i+1][j+2]==0)&&(field[i][j+1]!=0)&&(field[i][j+2]!=0)){
-						storeIndex[counter]=j+9;
-						height[counter]=i-priority;
-						counter++;
-					}
-				}
+		
+			for(int j=0;j<8;j++){
+				newField = copyArray(copyField);
+				newField = exeMove(newField,1,j,2);
+				storeIndex[counter]=j+9;
+				priority[counter]=getPriority(newField);
+				counter++;
 			}
-			for(int i=0;i<maxVert;i++){
-				for(int j=0;j<9;j++){
-					if((field[i+2][j]==0)&&(field[i+2][j+1]==0)&&(field[i+1][j+1]==0)&&(field[i][j+1]==0)&&(field[i][j]!=0)&&(field[i+1][j]!=0)){
-						storeIndex[counter]=j+17;
-						height[counter]=i-priority;
-						counter++;
-					}
-				}
+		
+			for(int j=0;j<9;j++){
+				newField = copyArray(copyField);
+				newField = exeMove(newField,2,j,2);
+				storeIndex[counter]=j+17;
+				priority[counter]=getPriority(newField);
+				counter++;
 			}
-			for(int i=0;i<maxHorz;i++){
-				for(int j=0;j<8;j++){
-					if((field[i][j]==0)&&(field[i][j+1]==0)&&(field[i][j+2]==0)&&(topIsClear(j,i,3,field))){
-						storeIndex[counter]=j+26;
-						height[counter]=i;
-						counter++;
-					}
-				}
+		
+			for(int j=0;j<8;j++){
+				newField = copyArray(copyField);
+				newField = exeMove(newField,3,j,2);
+				storeIndex[counter]=j+26;
+				priority[counter]=getPriority(newField);
+				counter++;
 			}
+			
 		}
 		else if(nextPiece==3){
-			for(int i=0;i<maxVert;i++){
 				for(int j=0;j<9;j++){
-					if((field[i][j]==0)&&(field[i][j+1]==0)&&(topIsClear(j,i,2,field))){
-						storeIndex[counter]=j;
-						height[counter]=i;
-						counter++;
-					}
+					newField = copyArray(copyField);
+					newField = exeMove(newField,0,j,3);
+					storeIndex[counter]=j;
+					priority[counter]=getPriority(newField);
+					counter++;
 				}
-			}
-			for(int i=0;i<maxHorz;i++){
+			
 				for(int j=0;j<8;j++){
-					if((field[i][j]==0)&&(field[i][j+1]==0)&&(field[i][j+2]==0)&&(topIsClear(j,i,3,field))){
-						storeIndex[counter]=j+9;
-						height[counter]=i;
-						counter++;
-					}
+					newField = copyArray(copyField);
+					newField = exeMove(newField,1,j,3);
+					storeIndex[counter]=j+9;
+					priority[counter]=getPriority(newField);
+					counter++;
 				}
-			}
-			for(int i=0;i<maxVert;i++){
+			
 				for(int j=0;j<9;j++){
-					if((field[i][j]==0)&&(field[i+1][j]==0)&&(field[i+2][j]==0)&&(field[i+2][j+1]==0)&&(field[i+1][j]!=0)&&(field[i+1][j+1]!=0)){
-						storeIndex[counter]=j+17;
-						height[counter]=i-priority;
-						counter++;
-					}
+					newField = copyArray(copyField);
+					newField = exeMove(newField,2,j,3);
+					storeIndex[counter]=j+17;
+					priority[counter]=getPriority(newField);
+					counter++;
 				}
-			}
-			for(int i=0;i<maxHorz;i++){
+			
 				for(int j=0;j<8;j++){
-					if((field[i][j+2]==0)&&(field[i+1][j+2]==0)&&(field[i+1][j+1]==0)&&(field[i+1][j]==0)&&(field[i][j]!=0)&&(field[i][j+1]!=0)){
-						storeIndex[counter]=j+26;
-						height[counter]=i-priority;
-						counter++;
-					}
+					newField = copyArray(copyField);
+					newField = exeMove(newField,3,j,3);
+					storeIndex[counter]=j+26;
+					priority[counter]=getPriority(newField);
+					counter++;
 				}
-			}
+			
 		}
 		else if(nextPiece==4){
-			for(int i=0;i<maxVert;i++){
 				for(int j=0;j<9;j++){
-					if((field[i][j]==0)&&(field[i+1][j]==0)&&(field[i+1][j+1]==0)&&(field[i+2][j]==0)&&(field[i][j+1]!=0)){
-						storeIndex[counter]=j;
-						height[counter]=i-priority;
-						counter++;
-					}
+					newField = copyArray(copyField);
+					newField = exeMove(newField,0,j,4);
+					storeIndex[counter]=j;
+					priority[counter]=getPriority(newField);
+					counter++;
 				}
-			}
-			for(int i=0;i<maxHorz;i++){
+			
 				for(int j=0;j<8;j++){
-					if((field[i][j+1]==0)&&(field[i+1][j]==0)&&(field[i+1][j+1]==0)&&(field[i+1][j+2]==0)&&(field[i][j]!=0)&&(field[i][j+2]!=0)){
-						storeIndex[counter]=j+9;
-						height[counter]=i-priority;
-						counter++;
-					}
+					newField = copyArray(copyField);
+					newField = exeMove(newField,1,j,4);
+					storeIndex[counter]=j+9;
+					priority[counter]=getPriority(newField);
+					counter++;
 				}
-			}
-			for(int i=0;i<maxVert;i++){
+			
 				for(int j=0;j<9;j++){
-					if((field[i][j+1]==0)&&(field[i+1][j+1]==0)&&(field[i+1][j]==0)&&(field[i+2][j+1]==0)&&(field[i][j]!=0)){
-						storeIndex[counter]=j+17;
-						height[counter]=i-priority;
-						counter++;
-					}
+					newField = copyArray(copyField);
+					newField = exeMove(newField,2,j,4);
+					storeIndex[counter]=j+17;
+					priority[counter]=getPriority(newField);
+					counter++;
 				}
-			}
-			for(int i=0;i<maxHorz;i++){
+			
 				for(int j=0;j<8;j++){
-					if((field[i][j]==0)&&(field[i][j+1]==0)&&(field[i][j+2]==0)&&(topIsClear(j,i,3,field))){
-						storeIndex[counter]=j+26;
-						height[counter]=i;
-						counter++;
-					}
+					newField = copyArray(copyField);
+					newField = exeMove(newField,3,j,4);
+					storeIndex[counter]=j+26;
+					priority[counter]=getPriority(newField);
+					counter++;
 				}
-			}
+			
 		}
 		else if(nextPiece==5){
-			for(int i=0;i<maxHorz;i++){
 				for(int j=0;j<8;j++){
-					if((field[i][j]==0)&&(field[i][j+1]==0)&&(field[i+1][j+1]==0)&&(field[i+1][j+2]==0)&&(field[i][j+2]!=0)){
-						storeIndex[counter]=j;
-						height[counter]=i-priority;
-						counter++;
-					}
-					if((field[i][j]==0)&&(field[i][j+1]==0)&&(topIsClear(j,i,3,field))){
-						storeIndex[counter]=j;
-						height[counter]=i;
-						counter++;
-					}
+					newField = copyArray(copyField);
+					newField = exeMove(newField,0,j,5);
+					storeIndex[counter]=j;
+					priority[counter]=getPriority(newField);
+					counter++;
 				}
-			}
-			for(int i=0;i<maxVert;i++){
+			
 				for(int j=0;j<9;j++){
-					if((field[i+1][j]==0)&&(field[i+2][j]==0)&&(field[i+1][j+1]==0)&&(field[i][j+1]==0)&&(field[i][j]!=0)){
-						storeIndex[counter]=j+8;
-						height[counter]=i-priority;
-						counter++;
-					}
-					if((field[i][j]==0)&&(field[i][j+1]==0)&&(topIsClear(j,i,2,field))){
-						storeIndex[counter]=j;
-						height[counter]=i;
-						counter++;
-					}
+					newField = copyArray(copyField);
+					newField = exeMove(newField,1,j,5);
+					storeIndex[counter]=j+8;
+					priority[counter]=getPriority(newField);
+					counter++;
 				}
-			}
+
 		}
 		else if(nextPiece==6){
-			for(int i=0;i<maxHorz;i++){
 				for(int j=0;j<8;j++){
-					if((field[i+1][j]==0)&&(field[i+1][j+1]==0)&&(field[i][j+1]==0)&&(field[i][j+2]==0)&&(field[i][j]!=0)){
-						storeIndex[counter]=j;
-						height[counter]=i-priority;
-						counter++;
-					}
-					if((field[i][j]==0)&&(field[i][j+1]==0)&&(field[i][j+2]==0)&&(topIsClear(j,i,3,field))){
-						storeIndex[counter]=j;
-						height[counter]=i;
-						counter++;
-					}
+					newField = copyArray(copyField);
+					newField = exeMove(newField,0,j,6);
+					storeIndex[counter]=j;
+					priority[counter]=getPriority(newField);
+					counter++;
 				}
-			}
-			for(int i=0;i<maxVert;i++){
+			
+		
 				for(int j=0;j<9;j++){
-					if((field[i][j]==0)&&(field[i+1][j]==0)&&(field[i+1][j+1]==0)&&(field[i+2][j+1]==0)&&(field[i][j+1]!=0)){
-						storeIndex[counter]=j+8;
-						height[counter]=i-priority;
-						counter++;
-					}
-					if((field[i][j]==0)&&(field[i][j+1]==0)&&(topIsClear(j,i,2,field))){
-						storeIndex[counter]=j;
-						height[counter]=i;
-						counter++;
-					}
+					newField = copyArray(copyField);
+					newField = exeMove(newField,1,j,6);
+					storeIndex[counter]=j+8;
+					priority[counter]=getPriority(newField);
+					counter++;
 				}
-			}
 		}
 			
-		int minimum=2000;
+		double maximum=-2000000000;
 		int indexRes=-1;
 		for(int i=0;i<counter;i++){
-			if(height[i]<minimum){
-				minimum=height[i];
+			if(priority[i]>maximum){
+				maximum=priority[i];
 				indexRes=i;
 			}
 		}
@@ -249,11 +752,11 @@ public class PlayerSkeleton {
 			return storeIndex[indexRes];
 		}
 		
-		
+		/*
 		for(int i=0;i<legalMoves.length;i++){
 			System.out.print("legalMoves[" + i + "] : ");
 			System.out.println(Arrays.toString(legalMoves[i]));
-		}
+		}*/
 		
 		
 		Scanner cin = new Scanner(System.in);

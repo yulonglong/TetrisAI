@@ -20,6 +20,8 @@ public class PlayerSkeleton {
 				}
 			}
 		}
+		maxheight++;
+		minheight++;
 		return ((maxheight+minheight)/2);
 	}
 	
@@ -197,15 +199,15 @@ public class PlayerSkeleton {
 	//priority, set the weight here
 	private static double getPriority(int[][] field){
 		
-		double lineWeight =3.4181268;
+		double lineWeight =3.4181268101392694;
 		double heightWeight= 0;
-		double holeWeight=-7.899265427;
+		double holeWeight=-7.899265427351652;
 		double blockageWeight=0;
 		double bumpinessWeight=0;
-		double wellWeight=-3.3855972247;
-		double rowTransitionWeight = -3.217888;
-		double columnTransitionWeight = -9.348695;
-		double heightLandingWeight = -4.5;
+		double wellWeight=-3.3855972247263626;
+		double rowTransitionWeight = -3.2178882868487753;
+		double columnTransitionWeight = -9.348695305445199;
+		double heightLandingWeight = -4.500158825082766;
 		
 		
 		double line = getLinesFormed(field);

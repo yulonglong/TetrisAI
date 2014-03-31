@@ -4,7 +4,27 @@ import java.util.Arrays;
 public class PlayerSkeleton {
 	static int INF = 2000000000;
 	
-	//tenth factor of priority, landingHeight
+	double lineWeight =3.4181268101392694;
+	double heightWeight= 0;
+	double holeWeight=-7.899265427351652;
+	double blockageWeight=0;
+	double bumpinessWeight=0;
+	double wellWeight=-3.3855972247263626;
+	double columnTransitionWeight = -9.348695305445199;
+	double rowTransitionWeight = -3.2178882868487753;
+	double heightLandingWeight = -4.500158825082766;
+	
+	double lineExponent = 1.1;
+	double heightExponent = 1.1;
+	double holeExponent = 1.1;
+	double blockageExponent = 1.1;
+	double bumpinessExponent = 1.1;
+	double wellExponent=1.1;
+	double columnTransitionExponent = 1.1;
+	double rowTransitionExponent = 1.1;
+	double heightLandingExponent = 1.1;
+	
+	//ninth factor of priority, landingHeight
 	private static int getLandingHeight(int[][] field){
 		int maxheight=-1;
 		int minheight=25;
@@ -197,18 +217,7 @@ public class PlayerSkeleton {
 	}
 	
 	//priority, set the weight here
-	private static double getPriority(int[][] field){
-		
-		double lineWeight =3.4181268101392694;
-		double heightWeight= 0;
-		double holeWeight=-7.899265427351652;
-		double blockageWeight=0;
-		double bumpinessWeight=0;
-		double wellWeight=-3.3855972247263626;
-		double rowTransitionWeight = -3.2178882868487753;
-		double columnTransitionWeight = -9.348695305445199;
-		double heightLandingWeight = -4.500158825082766;
-		
+	private double getPriority(int[][] field){
 		
 		double line = getLinesFormed(field);
 		double height = getResultantHeight(field);
@@ -219,6 +228,18 @@ public class PlayerSkeleton {
 		double rowTransition = getRowTransitions(field);
 		double columnTransition = getColumnTransitions(field);
 		double heightLanding = getLandingHeight(field);
+		
+		/*
+		line = Math.pow(lineExponent,line);
+		height = Math.pow(heightExponent, height);
+		hole = Math.pow(holeExponent, hole);
+		blockage = Math.pow(blockageExponent,blockage);
+		bumpiness = Math.pow(bumpinessExponent,bumpiness);
+		well = Math.pow(wellExponent,well);
+		rowTransition = Math.pow(rowTransitionExponent,rowTransition);
+		columnTransition = Math.pow(columnTransitionExponent,columnTransition);
+		heightLanding = Math.pow(heightLandingExponent,heightLanding);
+		*/
 		
 		double score = lineWeight*line;
 		score += heightWeight*height;
@@ -818,7 +839,7 @@ public class PlayerSkeleton {
 					counter++;
 				}
 		}	
-		double maximum=-2000000000;
+		double maximum=-Double.MAX_VALUE;
 		int indexRes=-1;
 		for(int i=0;i<counter;i++){
 			if(priority[i]>maximum){
@@ -842,10 +863,39 @@ public class PlayerSkeleton {
 		return test;
 	}
 	
+	public void setWeight(){
+		Scanner cin = new Scanner(System.in);
+		
+		System.out.println("Do you want to set the heuristics weight? (Y/N) : ");
+		String choice = cin.next();
+		if (choice.equalsIgnoreCase("Y")){
+			System.out.println("Please Enter lineWeight : ");
+			lineWeight = cin.nextDouble();
+			System.out.println("Please Enter heightWeight : ");
+			heightWeight= cin.nextDouble();
+			System.out.println("Please Enter holeWeight : ");
+			holeWeight=cin.nextDouble();
+			System.out.println("Please Enter blockageWeight : ");
+			blockageWeight=cin.nextDouble();
+			System.out.println("Please Enter bumpinessWeight : ");
+			bumpinessWeight=cin.nextDouble();
+			System.out.println("Please Enter wellWeight : ");
+			wellWeight=cin.nextDouble();
+			System.out.println("Please Enter columnTransitionWeight : ");
+			columnTransitionWeight = cin.nextDouble();
+			System.out.println("Please Enter rowTransitionWeight : ");
+			rowTransitionWeight = cin.nextDouble();
+			System.out.println("Please Enter heightLandingWeight : ");
+			heightLandingWeight = cin.nextDouble();
+		}
+	}
+	
 	public static void main(String[] args) {
+		
 		State s = new State();
 		new TFrame(s);
 		PlayerSkeleton p = new PlayerSkeleton();
+		p.setWeight();//comment this part to disable setting weight
 		while(!s.hasLost()) {
 			s.makeMove(p.pickMove(s,s.legalMoves()));
 			s.draw();

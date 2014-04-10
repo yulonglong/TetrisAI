@@ -2,8 +2,11 @@ import java.util.Scanner;
 import java.util.Arrays;
 
 public class PlayerSkeleton {
-	static int INF = 2000000000;
-	
+
+	static int INF1 = 2000000000;
+	static int INF2 = 2100000000;
+	int globalINF = INF1;
+
 	double lineWeight =3.4181268101392694;
 	double heightWeight= 0;
 	double holeWeight=-7.899265427351652;
@@ -13,6 +16,7 @@ public class PlayerSkeleton {
 	double columnTransitionWeight = -9.348695305445199;
 	double rowTransitionWeight = -3.2178882868487753;
 	double heightLandingWeight = -4.500158825082766;
+	double lookAheadWeight = 1;
 	
 	double lineExponent = 1.1;
 	double heightExponent = 1.1;
@@ -25,12 +29,12 @@ public class PlayerSkeleton {
 	double heightLandingExponent = 1.1;
 	
 	//ninth factor of priority, landingHeight
-	private static int getLandingHeight(int[][] field){
+	private static int getLandingHeight(int[][] field,int customINF){
 		int maxheight=-1;
 		int minheight=25;
 		for(int i=20;i>=0;i--){
 			for(int j=0;j<10;j++){
-				if(INF==field[i][j]){
+				if(customINF==field[i][j]){
 					if(maxheight<i){
 						maxheight=i;
 					}
@@ -227,19 +231,19 @@ public class PlayerSkeleton {
 		double well = getNumOfWells(field);
 		double rowTransition = getRowTransitions(field);
 		double columnTransition = getColumnTransitions(field);
-		double heightLanding = getLandingHeight(field);
+		double heightLanding = getLandingHeight(field,globalINF);
 		
-		/*
-		line = Math.pow(lineExponent,line);
-		height = Math.pow(heightExponent, height);
-		hole = Math.pow(holeExponent, hole);
-		blockage = Math.pow(blockageExponent,blockage);
-		bumpiness = Math.pow(bumpinessExponent,bumpiness);
-		well = Math.pow(wellExponent,well);
-		rowTransition = Math.pow(rowTransitionExponent,rowTransition);
-		columnTransition = Math.pow(columnTransitionExponent,columnTransition);
-		heightLanding = Math.pow(heightLandingExponent,heightLanding);
-		*/
+		
+		//line = Math.pow(lineExponent,line);
+		//height = Math.pow(heightExponent, height);
+		//hole = Math.pow(holeExponent, hole);
+		//blockage = Math.pow(blockageExponent,blockage);
+		//bumpiness = Math.pow(bumpinessExponent,bumpiness);
+		//well = Math.pow(wellExponent,well);
+		//rowTransition = Math.pow(rowTransitionExponent,rowTransition);
+		//columnTransition = Math.pow(columnTransitionExponent,columnTransition);
+		//heightLanding = Math.pow(heightLandingExponent,heightLanding);
+		
 		
 		double score = lineWeight*line;
 		score += heightWeight*height;
@@ -274,10 +278,19 @@ public class PlayerSkeleton {
 		}
 		return newArr;
 	}
+
+	private static void copyArrayByReference(int[][] newArr,int[][] arr){
+		for(int i=0;i<21;i++){
+			for(int j=0;j<10;j++){
+				newArr[i][j]=arr[i][j];
+			}
+		}
+		return;
+	}
 	
 	
 	//VERY LONG METHOD, WARNING
-	private static int[][] exeMove(int[][] field,int orient,int index, int type){
+	private static int[][] exeMove(int[][] field,int orient,int index, int type, int INF){
 		//type 0
 		if(type==0){
 			for(int i=18;i>=0;i--){
@@ -660,12 +673,261 @@ public class PlayerSkeleton {
 		return field;
 	}
 
-	//implement this function to have a working system
-	public int pickMove(State s, int[][] legalMoves) {
+	private int searchAllMoves(int[][] copyField, double[] priority, int[] storeIndex,int nextPiece,int customINF,int[][][] storeField){
+		int counter=0;
+		int[][] newField = new int[21][10];
+
+		if(nextPiece==0){
+			for(int j=0;j<9;j++){
+				newField = copyArray(copyField);
+				newField = exeMove(newField,0,j,0,customINF);
+				storeIndex[counter]=j;
+				priority[counter]=getPriority(newField);
+				storeField[counter]= newField;
+				counter++;
+			}
+		}
+		else if(nextPiece==1){
+				for(int j=0;j<=9;j++){
+					newField = copyArray(copyField);
+					newField = exeMove(newField,0,j,1,customINF);
+					storeIndex[counter]=j;
+					priority[counter]=getPriority(newField);
+					storeField[counter]= newField;
+					counter++;
+				}
+				for(int j=0;j<=5;j++){
+					newField = copyArray(copyField);
+					newField = exeMove(newField,1,j,1,customINF);
+					storeIndex[counter]=10+j;
+					priority[counter]=getPriority(newField);
+					storeField[counter]= newField;
+					counter++;
+				}
+		}
+		else if(nextPiece==2){
+			for(int j=0;j<9;j++){
+				newField = copyArray(copyField);
+				newField = exeMove(newField,0,j,2,customINF);
+				storeIndex[counter]=j;
+				priority[counter]=getPriority(newField);
+				storeField[counter]= newField;
+				counter++;
+			}
+		
+			for(int j=0;j<8;j++){
+				newField = copyArray(copyField);
+				newField = exeMove(newField,1,j,2,customINF);
+				storeIndex[counter]=j+9;
+				priority[counter]=getPriority(newField);
+				storeField[counter]= newField;
+				counter++;
+			}
+		
+			for(int j=0;j<9;j++){
+				newField = copyArray(copyField);
+				newField = exeMove(newField,2,j,2,customINF);
+				storeIndex[counter]=j+17;
+				priority[counter]=getPriority(newField);
+				storeField[counter]= newField;
+				counter++;
+			}
+		
+			for(int j=0;j<8;j++){
+				newField = copyArray(copyField);
+				newField = exeMove(newField,3,j,2,customINF);
+				storeIndex[counter]=j+26;
+				priority[counter]=getPriority(newField);
+				storeField[counter]= newField;
+				counter++;
+			}
+			
+		}
+		else if(nextPiece==3){
+				for(int j=0;j<9;j++){
+					newField = copyArray(copyField);
+					newField = exeMove(newField,0,j,3,customINF);
+					storeIndex[counter]=j;
+					priority[counter]=getPriority(newField);
+					storeField[counter]= newField;
+					counter++;
+				}
+			
+				for(int j=0;j<8;j++){
+					newField = copyArray(copyField);
+					newField = exeMove(newField,1,j,3,customINF);
+					storeIndex[counter]=j+9;
+					priority[counter]=getPriority(newField);
+					storeField[counter]= newField;
+					counter++;
+				}
+			
+				for(int j=0;j<9;j++){
+					newField = copyArray(copyField);
+					newField = exeMove(newField,2,j,3,customINF);
+					storeIndex[counter]=j+17;
+					priority[counter]=getPriority(newField);
+					storeField[counter]= newField;
+					counter++;
+				}
+			
+				for(int j=0;j<8;j++){
+					newField = copyArray(copyField);
+					newField = exeMove(newField,3,j,3,customINF);
+					storeIndex[counter]=j+26;
+					priority[counter]=getPriority(newField);
+					storeField[counter]= newField;
+					counter++;
+				}
+			
+		}
+		else if(nextPiece==4){
+				for(int j=0;j<9;j++){
+					newField = copyArray(copyField);
+					newField = exeMove(newField,0,j,4,customINF);
+					storeIndex[counter]=j;
+					priority[counter]=getPriority(newField);
+					storeField[counter]= newField;
+					counter++;
+				}
+			
+				for(int j=0;j<8;j++){
+					newField = copyArray(copyField);
+					newField = exeMove(newField,1,j,4,customINF);
+					storeIndex[counter]=j+9;
+					priority[counter]=getPriority(newField);
+					storeField[counter]= newField;
+					counter++;
+				}
+			
+				for(int j=0;j<9;j++){
+					newField = copyArray(copyField);
+					newField = exeMove(newField,2,j,4,customINF);
+					storeIndex[counter]=j+17;
+					priority[counter]=getPriority(newField);
+					storeField[counter]= newField;
+					counter++;
+				}
+			
+				for(int j=0;j<8;j++){
+					newField = copyArray(copyField);
+					newField = exeMove(newField,3,j,4,customINF);
+					storeIndex[counter]=j+26;
+					priority[counter]=getPriority(newField);
+					storeField[counter]= newField;
+					counter++;
+				}
+			
+		}
+		else if(nextPiece==5){
+				for(int j=0;j<8;j++){
+					newField = copyArray(copyField);
+					newField = exeMove(newField,0,j,5,customINF);
+					storeIndex[counter]=j;
+					priority[counter]=getPriority(newField);
+					storeField[counter]= newField;
+					counter++;
+				}
+			
+				for(int j=0;j<9;j++){
+					newField = copyArray(copyField);
+					newField = exeMove(newField,1,j,5,customINF);
+					storeIndex[counter]=j+8;
+					priority[counter]=getPriority(newField);
+					storeField[counter]= newField;
+					counter++;
+				}
+
+		}
+		else if(nextPiece==6){
+				for(int j=0;j<8;j++){
+					newField = copyArray(copyField);
+					newField = exeMove(newField,0,j,6,customINF);
+					storeIndex[counter]=j;
+					priority[counter]=getPriority(newField);
+					storeField[counter]= newField;
+					counter++;
+				}
+			
+		
+				for(int j=0;j<9;j++){
+					newField = copyArray(copyField);
+					newField = exeMove(newField,1,j,6,customINF);
+					storeIndex[counter]=j+8;
+					priority[counter]=getPriority(newField);
+					storeField[counter]= newField;
+					counter++;
+				}
+		}	
+		return counter;
+	}
+
+
+	private double searchAndGetMax(int[][] copyField,int nextPiece,int[][] resultField){
+		int counter=0;
 		int[] storeIndex = new int[100];
 		double[] priority = new double[100];
+		int[][][] storeField = new int [2000][21][10];
+
+		//this is the massive search
+		globalINF = INF2;
+		counter = searchAllMoves(copyField,priority,storeIndex,nextPiece,INF2,storeField);
+
+		double maximum=-Double.MAX_VALUE;
+		int indexRes=-1;
+
+		for(int i=0;i<counter;i++){
+			if(priority[i]>maximum){
+				maximum=priority[i];
+				indexRes=i;
+			}
+		}
+
+		return maximum;
+
+	}
+
+
+	private int searchAndGetMaxWithLookAhead(int[][] copyField,int nextPiece,int[][] resultField){
 		int counter=0;
-		
+		int[] storeIndex = new int[100];
+		double[] priority = new double[100];
+		int[][][] storeField = new int [2000][21][10];
+
+		//this is the massive search
+		globalINF = INF1;
+		counter = searchAllMoves(copyField,priority,storeIndex,nextPiece,INF1,storeField);
+
+		double maximum=-Double.MAX_VALUE;
+		int indexRes=-1;
+		int[][] tempField = new int[21][10];
+
+
+		for(int i=0;i<counter;i++){
+				double minLookAheadScore=INF2;
+				for(int j=0;j<=6;j++){
+					double tempScore = searchAndGetMax(storeField[i],j,tempField);
+					minLookAheadScore=Math.min(tempScore,minLookAheadScore);
+				}
+				priority[i]+=(minLookAheadScore*lookAheadWeight);
+		}
+
+		for(int i=0;i<counter;i++){
+			if(priority[i]>maximum){
+				maximum=priority[i];
+				indexRes=i;
+				tempField = storeField[i];
+			}
+		}
+
+		copyArrayByReference(resultField,tempField);
+	
+		return storeIndex[indexRes];
+
+	}
+
+	//implement this function to have a working system
+	public int pickMove(State s, int[][] legalMoves) {
 		int maxHorz=20;
 		int maxVert=19;
 		int currHeight = 0;
@@ -674,193 +936,22 @@ public class PlayerSkeleton {
 		field = s.getField();
 		int[][] copyField = copyArray(field);
 		int[][] newField = copyArray(field);
+		int[][] resultField = new int[21][10];
 		
-		
-		if(nextPiece==0){
-			for(int j=0;j<9;j++){
-				newField = copyArray(copyField);
-				newField = exeMove(newField,0,j,0);
-				storeIndex[counter]=j;
-				priority[counter]=getPriority(newField);
-				counter++;
-			}
-		}
-		else if(nextPiece==1){
-				for(int j=0;j<=9;j++){
-					newField = copyArray(copyField);
-					newField = exeMove(newField,0,j,1);
-					storeIndex[counter]=j;
-					priority[counter]=getPriority(newField);
-					counter++;
-				}
-				for(int j=0;j<=5;j++){
-					newField = copyArray(copyField);
-					newField = exeMove(newField,1,j,1);
-					storeIndex[counter]=10+j;
-					priority[counter]=getPriority(newField);
-					counter++;
-				}
-		}
-		else if(nextPiece==2){
-			for(int j=0;j<9;j++){
-				newField = copyArray(copyField);
-				newField = exeMove(newField,0,j,2);
-				storeIndex[counter]=j;
-				priority[counter]=getPriority(newField);
-				counter++;
-			}
-		
-			for(int j=0;j<8;j++){
-				newField = copyArray(copyField);
-				newField = exeMove(newField,1,j,2);
-				storeIndex[counter]=j+9;
-				priority[counter]=getPriority(newField);
-				counter++;
-			}
-		
-			for(int j=0;j<9;j++){
-				newField = copyArray(copyField);
-				newField = exeMove(newField,2,j,2);
-				storeIndex[counter]=j+17;
-				priority[counter]=getPriority(newField);
-				counter++;
-			}
-		
-			for(int j=0;j<8;j++){
-				newField = copyArray(copyField);
-				newField = exeMove(newField,3,j,2);
-				storeIndex[counter]=j+26;
-				priority[counter]=getPriority(newField);
-				counter++;
-			}
-			
-		}
-		else if(nextPiece==3){
-				for(int j=0;j<9;j++){
-					newField = copyArray(copyField);
-					newField = exeMove(newField,0,j,3);
-					storeIndex[counter]=j;
-					priority[counter]=getPriority(newField);
-					counter++;
-				}
-			
-				for(int j=0;j<8;j++){
-					newField = copyArray(copyField);
-					newField = exeMove(newField,1,j,3);
-					storeIndex[counter]=j+9;
-					priority[counter]=getPriority(newField);
-					counter++;
-				}
-			
-				for(int j=0;j<9;j++){
-					newField = copyArray(copyField);
-					newField = exeMove(newField,2,j,3);
-					storeIndex[counter]=j+17;
-					priority[counter]=getPriority(newField);
-					counter++;
-				}
-			
-				for(int j=0;j<8;j++){
-					newField = copyArray(copyField);
-					newField = exeMove(newField,3,j,3);
-					storeIndex[counter]=j+26;
-					priority[counter]=getPriority(newField);
-					counter++;
-				}
-			
-		}
-		else if(nextPiece==4){
-				for(int j=0;j<9;j++){
-					newField = copyArray(copyField);
-					newField = exeMove(newField,0,j,4);
-					storeIndex[counter]=j;
-					priority[counter]=getPriority(newField);
-					counter++;
-				}
-			
-				for(int j=0;j<8;j++){
-					newField = copyArray(copyField);
-					newField = exeMove(newField,1,j,4);
-					storeIndex[counter]=j+9;
-					priority[counter]=getPriority(newField);
-					counter++;
-				}
-			
-				for(int j=0;j<9;j++){
-					newField = copyArray(copyField);
-					newField = exeMove(newField,2,j,4);
-					storeIndex[counter]=j+17;
-					priority[counter]=getPriority(newField);
-					counter++;
-				}
-			
-				for(int j=0;j<8;j++){
-					newField = copyArray(copyField);
-					newField = exeMove(newField,3,j,4);
-					storeIndex[counter]=j+26;
-					priority[counter]=getPriority(newField);
-					counter++;
-				}
-			
-		}
-		else if(nextPiece==5){
-				for(int j=0;j<8;j++){
-					newField = copyArray(copyField);
-					newField = exeMove(newField,0,j,5);
-					storeIndex[counter]=j;
-					priority[counter]=getPriority(newField);
-					counter++;
-				}
-			
-				for(int j=0;j<9;j++){
-					newField = copyArray(copyField);
-					newField = exeMove(newField,1,j,5);
-					storeIndex[counter]=j+8;
-					priority[counter]=getPriority(newField);
-					counter++;
-				}
+		int bestMove = searchAndGetMaxWithLookAhead(copyField,nextPiece,resultField);
 
-		}
-		else if(nextPiece==6){
-				for(int j=0;j<8;j++){
-					newField = copyArray(copyField);
-					newField = exeMove(newField,0,j,6);
-					storeIndex[counter]=j;
-					priority[counter]=getPriority(newField);
-					counter++;
-				}
-			
-		
-				for(int j=0;j<9;j++){
-					newField = copyArray(copyField);
-					newField = exeMove(newField,1,j,6);
-					storeIndex[counter]=j+8;
-					priority[counter]=getPriority(newField);
-					counter++;
-				}
-		}	
-		double maximum=-Double.MAX_VALUE;
-		int indexRes=-1;
-		for(int i=0;i<counter;i++){
-			if(priority[i]>maximum){
-				maximum=priority[i];
-				indexRes=i;
-			}
-		}
-		if(indexRes>-1){
-			return storeIndex[indexRes];
-		}
-		
-		/*
-		for(int i=0;i<legalMoves.length;i++){
-			System.out.print("legalMoves[" + i + "] : ");
-			System.out.println(Arrays.toString(legalMoves[i]));
-		}*/
+
+		return bestMove;
+
+		//for(int i=0;i<legalMoves.length;i++){
+		//	System.out.print("legalMoves[" + i + "] : ");
+		//	System.out.println(Arrays.toString(legalMoves[i]));
+		//}
 		
 		
-		Scanner cin = new Scanner(System.in);
-		int test = cin.nextInt();
-		return test;
+		//Scanner cin = new Scanner(System.in);
+		//int test = cin.nextInt();
+		//return test;
 	}
 	
 	public void setWeight(){
@@ -887,6 +978,8 @@ public class PlayerSkeleton {
 			rowTransitionWeight = cin.nextDouble();
 			System.out.println("Please Enter heightLandingWeight : ");
 			heightLandingWeight = cin.nextDouble();
+			System.out.println("Please Enter LookAheadWeight : ");
+			lookAheadWeight = cin.nextDouble();
 		}
 	}
 	
@@ -901,7 +994,7 @@ public class PlayerSkeleton {
 			s.draw();
 			s.drawNext(0,0);
 			try {
-				Thread.sleep(10);
+				Thread.sleep(0);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

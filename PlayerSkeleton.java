@@ -9,26 +9,26 @@ public class PlayerSkeleton {
 	final double EPS = 1e-9;
 	int globalINF = INF1;
 
-	double lineWeight =3.4181268101392694;
-	double heightWeight= -0.000001;
-	double holeWeight=-7.899265427351652;
-	double blockageWeight=0;
-	double bumpinessWeight=0;
-	double wellWeight=-3.3855972247263626;
-	double columnTransitionWeight = -9.348695305445199;
-	double rowTransitionWeight = -3.2178882868487753;
-	double heightLandingWeight = -4.500158825082766;
+	double lineWeight = 3.781057045291721;
+	double heightWeight = -0.000001;
+	double holeWeight = -8.533854039893987;
+	double blockageWeight = 0;
+	double bumpinessWeight = 0;
+	double wellWeight = -7.053276659088376;
+	double columnTransitionWeight = -7.708336085296365;
+	double rowTransitionWeight = -2.5799680732117745;
+	double heightLandingWeight = -3.136943472726582;
 	double lookAheadWeight = 1;
 	
-	double lineExponent = 1.1;
-	double heightExponent = 1.1;
-	double holeExponent = 1.1;
-	double blockageExponent = 1.1;
-	double bumpinessExponent = 1.1;
-	double wellExponent=1.1;
-	double columnTransitionExponent = 1.1;
-	double rowTransitionExponent = 1.1;
-	double heightLandingExponent = 1.1;
+	double lineExponent = 9.763232628810648;
+	double heightExponent = 0;
+	double holeExponent = 1.6993720935711176;
+	double blockageExponent = 0;
+	double bumpinessExponent = 0;
+	double wellExponent = 5.333692367852307;
+	double columnTransitionExponent = 1.1603835054247467;
+	double rowTransitionExponent = 1.0796379646719207;
+	double heightLandingExponent = 1.3696465899099395;
 	
 	//ninth factor of priority, landingHeight
 	private static int getLandingHeight(int[][] field,int customINF){
@@ -950,28 +950,57 @@ public class PlayerSkeleton {
 		//this is the massive search
 		globalINF = INF1;
 		counter = searchAllMoves(copyField,priority,storeIndex,nextPiece,INF1,storeField,true);
-
-		double maximum=-Double.MAX_VALUE;
-		int indexRes=-1;
+		
+		
+		double[] maximum = new double[3];
+		int[] indexRes = new int[3];
+		for(int i=0;i<3;i++){
+			maximum[i] = -Double.MAX_VALUE;
+			indexRes[i] = -1;
+		}
+		
 
 		for(int i=0;i<counter;i++){
+			if(priority[i]>maximum[0]){
+				maximum[2]=maximum[1];
+				indexRes[2]=indexRes[1];
+				maximum[1]=maximum[0];
+				indexRes[1]=indexRes[0];
+				maximum[0]=priority[i];
+				indexRes[0]=i;
+			}
+			else if(priority[i]>maximum[1]){
+				maximum[2]=maximum[1];
+				indexRes[2]=indexRes[1];
+				maximum[1]=priority[i];
+				indexRes[1]=i;
+			}
+			else if(priority[i]>maximum[2]){
+				maximum[2]=priority[i];
+				indexRes[2]=i;
+			}
+		}
+		
+		for(int i=0;i<3;i++){
+				int index = indexRes[i];
 				double minLookAheadScore=INF2;
 				for(int j=0;j<=6;j++){
-					double tempScore = searchAndGetMax(storeField[i],j);
+					double tempScore = searchAndGetMax(storeField[index],j);
 					minLookAheadScore=Math.min(tempScore,minLookAheadScore);
 				}
-				priority[i]+=(minLookAheadScore*lookAheadWeight);
+				maximum[i]+=(minLookAheadScore*lookAheadWeight);
 		}
-
-		for(int i=0;i<counter;i++){
-			if(priority[i]>maximum){
-				maximum=priority[i];
-				indexRes=i;
+		
+		double maxResult = -Double.MAX_VALUE;
+		int maxResultIndex = -1;
+		for(int i=0;i<3;i++){
+			if(maximum[i]>maxResult){
+				maxResult = maximum[i];
+				maxResultIndex = indexRes[i];
 			}
 		}
 
-	
-		return storeIndex[indexRes];
+		return storeIndex[maxResultIndex];
 
 	}
 
@@ -1019,7 +1048,8 @@ public class PlayerSkeleton {
 		State s = new State();
 		new TFrame(s);
 		PlayerSkeleton p = new PlayerSkeleton();
-		p.setWeight();//comment this part to disable setting weight
+		//uncomment this part to enable setting weight
+		//p.setWeight();
 		while(!s.hasLost()) {
 			s.makeMove(p.pickMove(s,s.legalMoves()));
 			s.draw();

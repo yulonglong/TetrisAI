@@ -1,3 +1,10 @@
+//~ CS3243 project
+//~ Eng Teng Chuan (A0094593R)
+//~ Hisyam Nursaid Indrakesuma (A0098139R)
+//~ Daniel Dimas Dewangkara (A0083934X)
+//~ Steven Kester Yuwono (A0080415N)
+//~ Yohanes Lim (A0099768Y)
+
 import java.util.Scanner;
 import java.util.Arrays;
 
